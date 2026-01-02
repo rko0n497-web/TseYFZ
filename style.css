@@ -14,9 +14,14 @@ header {
 
 /* الشعار */
 .logo {
-    width: 90px;
-    margin-bottom: 15px;
+    width: 40px;        /* صغير */
+    position: fixed;    /* ثابت */
+    top: 15px;          /* فوق */
+    right: 15px;        /* يمين */
+    z-index: 9999;      /* فوق كل العناصر */
 }
+
+
 
 /* العنوان */
 header h1 {
@@ -52,5 +57,3 @@ footer {
     font-size: 14px;
     background-color: rgba(0, 0, 0, 0.2);
 }
-
-
