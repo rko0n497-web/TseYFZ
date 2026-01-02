@@ -1,0 +1,72 @@
+/* ألوان الموقع */
+body {
+    margin: 0;
+    font-family: Tahoma, Arial;
+    background-color: #F4F6F8;
+    color: #1F2937;
+}
+
+/* العناوين */
+h1, h2 {
+    letter-spacing: 1px;
+}
+
+/* الأزرار */
+button {
+    background-color: #2563EB;
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #1E40AF;
+    transform: scale(1.05);
+}
+
+/* الكروت */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+/* القسم الترحيبي */
+.hero {
+    background: linear-gradient(to left, #2563EB, #1E40AF);
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+/* الجوال */
+@media (max-width: 768px) {
+
+    header nav {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%;
+    }
+}
+section {
+    border-radius: 16px;
+}
+
