@@ -58,6 +58,11 @@ footer {
     background-color: rgba(0, 0, 0, 0.2);
 }
 .btn {
+    .back {
+    margin-bottom: 25px;
+    display: inline-block;
+}
+
     display: inline-block;
     padding: 10px 20px;
     background-color: #ffffff;
@@ -77,4 +82,5 @@ footer {
     background-color: #66ccff;
     color: #000;
 }
+
 
