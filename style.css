@@ -82,5 +82,17 @@ footer {
     background-color: #66ccff;
     color: #000;
 }
+.gradient-btn {
+    background: linear-gradient(135deg, #4facfe, #8f5cff);
+    color: #fff;
+}
+
+.gradient-btn:hover {
+    background: linear-gradient(135deg, #8f5cff, #4facfe);
+    transform: translateY(-2px);
+}
+html {
+    scroll-behavior: smooth;
+}
 
 
