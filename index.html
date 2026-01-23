@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TseYFZ - صفحتي الشخصية</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* أنماط خاصة بالصفحة الرئيسية */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* شريط التنقل */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #00ff88;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #ddd;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        /* قسم المقدمة */
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin-bottom: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid #00ff88;
+            margin: 0 auto 30px;
+            object-fit: cover;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: #aaa;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        /* قسم الألعاب */
+        .games-section {
+            padding: 50px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #00ff88;
+            margin-bottom: 50px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: #00ff88;
+            box-shadow: 0 15px 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .game-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #00ff88;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .game-desc {
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        /* طريقة فتح اللعبة */
+        .game-btn {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: black;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid #00ff88;
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .game-btn:hover {
+            background: black;
+            color: #00ff88;
+            transform: scale(1.05);
+        }
+
+        /* زر مميز للعبة القيم */
+        .special-btn {
+            background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+            color: black !important;
+            border-color: #FFD700 !important;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .special-btn:hover {
+            background: black !important;
+            color: #FFD700 !important;
+        }
+
+        /* نافذة اللعبة */
+        .game-window {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .game-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-title-bar {
+            font-size: 1.5rem;
+            color: #00ff88;
+        }
+
+        .close-game-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .game-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+
+        /* قسم المعلومات */
+        .about-section {
+            padding: 50px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin: 50px 0;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border-right: 5px solid #00ff88;
+        }
+
+        .info-card h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .info-card p {
+            color: #ddd;
+        }
+
+        /* زر قيمي الشخصية */
+        .values-btn-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .values-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid #3498db;
+            cursor: pointer;
+        }
+
+        .values-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        /* الفوتر */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 50px;
+            color: #aaa;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: #ddd;
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #00ff88;
+        }
+
+        /* نافذة القيم الشخصية */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            border: 3px solid #00ff88;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            color: #00ff88;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .values-list {
+            list-style: none;
+            text-align: right;
+        }
+
+        .values-list li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-right: 4px solid #3498db;
+        }
+
+        /* تنسيقات للجوال */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- شريط التنقل -->
+        <nav class="navbar">
+            <div class="logo">
+                <!-- ضع صورتك هنا -->
+                <div class="logo-img">
+                    <!-- إذا كان لديك صورة:
+                    <img src="logo.png" alt="صورة TseYFZ" class="logo-img">
+                    -->
+                </div>
+                <span class="logo-text">TseYFZ</span>
+            </div>
+            <div class="nav-links">
+                <a href="#home">الرئيسية</a>
+                <a href="#about">عني</a>
+                <a href="#games">ألعابي</a>
+                <a href="#contact">تواصل</a>
+            </div>
+        </nav>
+
+        <!-- قسم المقدمة -->
+        <section class="hero" id="home">
+            <div class="profile-img">
+                <!-- يمكنك إضافة صورتك هنا -->
+                <i class="fas fa-user" style="font-size: 5rem; color: #00ff88; line-height: 200px;"></i>
+            </div>
+            <h1>مرحباً، أنا TseYFZ</h1>
+            <p>مبرمج ومطور ألعاب ويب. أستمتع بإنشاء تجارب تفاعلية ممتعة وتحديات ذهنية مثيرة.</p>
+            
+            <!-- زر قيمي الشخصية -->
+            <div class="values-btn-container">
+                <button class="values-btn" id="showValuesBtn">
+                    <i class="fas fa-heart"></i>
+                    <span>My Values - قيمي الشخصية</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- قسم الألعاب -->
+        <section class="games-section" id="games">
+            <h2 class="section-title">🎮 ألعابي التفاعلية</h2>
+            
+            <div class="games-grid">
+                <!-- اللعبة الأولى: لعبة الذاكرة -->
+                <div class="game-card">
+                    <div class="game-icon">🧠</div>
+                    <h3 class="game-title">لعبة الذاكرة</h3>
+                    <p class="game-desc">اختبر ذاكرتك وذاكرة وقتك في مطابقة الأزواج المخفية.</p>
+                    <div class="game-buttons">
+                        <button class="game-btn" onclick="openGameInNewTab('games/game1.html')">
+                            <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+                        </button>
+                        <button class="game-btn" onclick="openGameInFrame('games/game1.html', 'لعبة الذاكرة')">
+                            <i class="fas fa-play"></i> تشغيل هنا
+                        </button>
+                    </div>
+                </div>
+
+                <!-- اللعبة الثانية: لعبة الضغط السريع -->
+                <div class="game-card">
+                    <div class="game-icon">⚡</div>
+                    <h3 class="game-title">لعبة الضغط السريع</h3>
+                    <p class="game-desc">اختبر سرعة رد فعلك وانقر بأقصى سرعة على الأهداف.</p>
+                    <div class="game-buttons">
+                        <button class="game-btn" onclick="openGameInNewTab('games/game2.html')">
+                            <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+                        </button>
+                        <button class="game-btn" onclick="openGameInFrame('games/game2.html', 'لعبة الضغط السريع')">
+                            <i class="fas fa-play"></i> تشغيل هنا
+                        </button>
+                    </div>
+                </div>
+
+                <!-- اللعبة الثالثة: لعبة الألغاز -->
+                <div class="game-card">
+                    <div class="game-icon">🧩</div>
+                    <h3 class="game-title">لعبة الألغاز المتساقطة</h3>
+                    <p class="game-desc">اجمع القطع المتشابهة قبل أن تتراكم وتصل للقمة.</p>
+                    <div class="game-buttons">
+                        <button class="game-btn" onclick="openGameInNewTab('games/game3.html')">
+                            <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+                        </button>
+                        <button class="game-btn" onclick="openGameInFrame('games/game3.html', 'لعبة الألغاز')">
+                            <i class="fas fa-play"></i> تشغيل هنا
+                        </button>
+                    </div>
+                </div>
+
+                <!-- اللعبة الرابعة: لعبة الحركة السريعة -->
+                <div class="game-card">
+                    <div class="game-icon">🎯</div>
+                    <h3 class="game-title">لعبة الحركة السريعة</h3>
+                    <p class="game-desc">اضغط E عندما يصل المؤشر إلى الهدف. تزداد السرعة مع كل مستوى.</p>
+                    <div class="game-buttons">
+                        <button class="game-btn" onclick="openGameInNewTab('games/game4.html')">
+                            <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+                        </button>
+                        <button class="game-btn" onclick="openGameInFrame('games/game4.html', 'لعبة الحركة السريعة')">
+                            <i class="fas fa-play"></i> تشغيل هنا
+                        </button>
+                    </div>
+                </div>
+
+                <!-- اللعبة الخامسة: لعبة المتاهة -->
+                <div class="game-card">
+                    <div class="game-icon">🧱</div>
+                    <h3 class="game-title">لعبة المتاهة الكلاسيكية</h3>
+                    <p class="game-desc">تحدي الذكاء! أوصل الكرة للنهاية عبر متاهات معقدة.</p>
+                    <div class="game-buttons">
+                        <button class="game-btn" onclick="openGameInNewTab('games/maze.html')">
+                            <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+                        </button>
+                        <button class="game-btn" onclick="openGameInFrame('games/maze.html', 'لعبة المتاهة')">
+                            <i class="fas fa-play"></i> تشغيل هنا
+                        </button>
+                    </div>
+                </div>
+
+                <!-- اللعبة السادسة: لعبة القيم الذهبية -->
+                <div class="game-card">
+                    <div class="game-icon">🌟</div>
+                    <h3 class="game-title">My Values Challenge</h3>
+                    <p class="game-desc">لعبة خاصة تكتشف وتطور قيمك الشخصية مع زر أصفر مميز!</p>
+                    <div class="game-buttons">
+                        <button class="game-btn special-btn" onclick="openGameInNewTab('games/values-game.html')">
+                            <i class="fas fa-crown"></i> اكتشف قيمك
+                        </button>
+                        <button class="game-btn special-btn" onclick="openGameInFrame('games/values-game.html', 'My Values Challenge')">
+                            <i class="fas fa-play"></i> تشغيل هنا
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم عني -->
+        <section class="about-section" id="about">
+            <h2 class="section-title">📝 عن TseYFZ</h2>
+            
+            <div class="about-grid">
+                <div class="info-card">
+                    <h3>🎓 التعليم</h3>
+                    <p>طالب علوم حاسوب ومهتم بتطوير الألعاب والتطبيقات التفاعلية.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>💼 المهارات</h3>
+                    <p>HTML, CSS, JavaScript, تطوير الألعاب، تصميم واجهات المستخدم.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🎮 الاهتمامات</h3>
+                    <p>تطوير الألعاب، البرمجة، التصميم، الألعاب الإلكترونية، التقنية.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🚀 الأهداف</h3>
+                    <p>تطوير ألعاب تعليمية مبتكرة ومساعدة الآخرين في تعلم البرمجة.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- الفوتر -->
+        <footer class="footer" id="contact">
+            <p>© 2024 TseYFZ. جميع الحقوق محفوظة.</p>
+            <p>تم تطوير هذا الموقع باستخدام HTML, CSS, JavaScript</p>
+            
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-codepen"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- نافذة اللعبة -->
+    <div class="game-window" id="gameWindow">
+        <div class="game-header">
+            <div class="game-title-bar" id="gameWindowTitle">🎮 لعبة</div>
+            <button class="close-game-btn" onclick="closeGameWindow()">
+                <i class="fas fa-times"></i> إغلاق اللعبة
+            </button>
+        </div>
+        <iframe class="game-frame" id="gameFrame" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
+
+    <!-- نافذة القيم الشخصية -->
+    <div class="modal" id="valuesModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModalBtn">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <h2>My Values - قيمي الشخصية</h2>
+            
+            <ul class="values-list">
+                <li>💡 <strong>الإبداع:</strong> البحث عن حلول مبتكرة لكل تحدي</li>
+                <li>🎯 <strong>الدقة:</strong> الاهتمام بالتفاصيل والإتقان في العمل</li>
+                <li>⚡ <strong>السرعة:</strong> الاستجابة السريعة مع الحفاظ على الجودة</li>
+                <li>🤝 <strong>التعاون:</strong> العمل الجماعي وتبادل المعرفة</li>
+                <li>📚 <strong>التعلم المستمر:</strong> تطوير المهارات باستمرار</li>
+                <li>🎮 <strong>المتعة:</strong> جعل التعلم والتطوير تجربة ممتعة</li>
+                <li>💪 <strong>المثابرة:</strong> عدم الاستسلام عند مواجهة الصعوبات</li>
+                <li>🌐 <strong>الابتكار:</strong> استخدام التقنية لخلق تجارب جديدة</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="game-btn" id="closeModalBtn2" style="background: linear-gradient(45deg, #3498db, #2980b9);">
+                    <i class="fas fa-check"></i> فهمت
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // وظائف فتح الألعاب
+        function openGameInNewTab(gameUrl) {
+            window.open(gameUrl, '_blank');
+        }
+
+        function openGameInFrame(gameUrl, gameTitle) {
+            const gameWindow = document.getElementById('gameWindow');
+            const gameFrame = document.getElementById('gameFrame');
+            const gameWindowTitle = document.getElementById('gameWindowTitle');
+            
+            // ضبط العنوان
+            gameWindowTitle.textContent = `🎮 ${gameTitle}`;
+            
+            // تحميل اللعبة في الإطار
+            gameFrame.src = gameUrl;
+            
+            // إظهار النافذة
+            gameWindow.style.display = 'flex';
+            
+            // منع التمرير في الصفحة الرئيسية
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGameWindow() {
+            const gameWindow = document.getElementById('gameWindow');
+            const gameFrame = document.getElementById('gameFrame');
+            
+            // إغلاق النافذة
+            gameWindow.style.display = 'none';
+            
+            // إيقاف اللعبة
+            gameFrame.src = '';
+            
+            // إعادة التمرير في الصفحة الرئيسية
+            document.body.style.overflow = 'auto';
+        }
+
+        // التحكم في نافذة القيم الشخصية
+        const showValuesBtn = document.getElementById('showValuesBtn');
+        const valuesModal = document.getElementById('valuesModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeModalBtn2 = document.getElementById('closeModalBtn2');
+
+        // فتح النافذة
+        showValuesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            valuesModal.style.display = 'flex';
+        });
+
+        // إغلاق النافذة
+        closeModalBtn.addEventListener('click', function() {
+            valuesModal.style.display = 'none';
+        });
+
+        closeModalBtn2.addEventListener('click', function() {
+            valuesModal.style.display = 'none';
+        });
+
+        // إغلاق النافذة بالنقر خارجها
+        valuesModal.addEventListener('click', function(e) {
+            if (e.target === valuesModal) {
+                valuesModal.style.display = 'none';
+            }
+        });
+
+        // التنقل السلس
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // إغلاق نافذة اللعبة بمفتاح ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGameWindow();
+            }
+        });
+
+        // رسالة ترحيبية
+        window.addEventListener('load', function() {
+            console.log('مرحباً بك في صفحة TseYFZ الشخصية! 🚀');
+            console.log('جميع الألعاب تعمل بشكل صحيح! 🎮');
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
