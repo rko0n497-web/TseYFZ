@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<!-- أضف هذا في بداية كل لعبة -->
+<script>
+    // حل مشكلة CORS عند التشغيل من iframe
+    if (window !== window.top) {
+        // نحن داخل iframe، اسمح بالوصول
+        try {
+            window.parent.postMessage('gameLoaded', '*');
+        } catch(e) {
+            console.log('Game running in iframe');
+        }
+    }
+    
+    // منع الأخطاء عند التشغيل من iframe
+    window.addEventListener('error', function(e) {
+        if (window !== window.top) {
+            e.preventDefault();
+            console.log('Error handled for iframe:', e.message);
+        }
+    });
+</script>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الحركة السريعة - Speed Click Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c2461, #1e3799, #4a69bd);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            border: 3px solid #f6b93b;
+            text-align: center;
+        }
+
+        .game-header {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 3.5rem;
+            color: #f6b93b;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(246, 185, 59, 0.7);
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        .game-subtitle {
+            font-size: 1.4rem;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #f6b93b;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #ddd;
+            margin-top: 5px;
+        }
+
+        /* منطقة اللعبة */
+        .game-area {
+            background: rgba(30, 30, 46, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 3px solid #4a69bd;
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        .track-container {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            height: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* المحطة (الهدف) */
+        .station {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 120px;
+            background: linear-gradient(90deg, rgba(38, 194, 129, 0.3), rgba(38, 194, 129, 0.1));
+            border-left: 3px solid #26c281;
+            border-right: 3px solid #26c281;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(38, 194, 129, 0.8);
+        }
+
+        .station::before {
+            content: 'E';
+            background: #26c281;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(38, 194, 129, 0.8);
+        }
+
+        /* المؤشر المتحرك */
+        .pointer {
+            position: absolute;
+            top: 0;
+            left: -100px;
+            height: 100%;
+            width: 20px;
+            background: linear-gradient(to bottom, #ff6b6b, #ff3838);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            transition: left 0.1s linear;
+            z-index: 10;
+        }
+
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -5px;
+            width: 30px;
+            height: 30px;
+            background: #ff3838;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 56, 56, 0.8);
+        }
+
+        /* مؤشرات السرعة */
+        .speed-indicators {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .speed-indicator {
+            width: 3px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* مؤشرات التوقيت */
+        .timing-indicators {
+            position: absolute;
+            top: 150px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .timing-indicator {
+            width: 60px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ddd;
+            font-weight: bold;
+        }
+
+        /* أزرار التحكم */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 18px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-width: 220px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 2px solid white;
+        }
+
+        .start-btn {
+            background: linear-gradient(to right, #26c281, #019031);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(to right, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .home-btn {
+            background: linear-gradient(to right, #4a69bd, #1e3799);
+            color: white;
+            text-decoration: none;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* التعليمات */
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: right;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .instructions-title {
+            color: #f6b93b;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .instructions-list {
+            list-style: none;
+            color: #ddd;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        .instructions-list li {
+            margin-bottom: 15px;
+            padding-right: 10px;
+        }
+
+        .instructions-list i {
+            color: #26c281;
+            margin-left: 10px;
+        }
+
+        /* شاشة النتائج */
+        .results-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .results-card {
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            padding: 50px;
+            border-radius: 20px;
+            border: 4px solid #f6b93b;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(246, 185, 59, 0.6);
+        }
+
+        .results-title {
+            color: #f6b93b;
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .result-stat {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #26c281;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .result-label {
+            font-size: 1.2rem;
+            color: #ddd;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(to right, #f6b93b, #fa983a);
+            color: #000;
+            border-radius: 25px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            border: 3px solid white;
+            text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        /* مؤشرات النجاح/الفشل */
+        .hit-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 20;
+            animation: fadeInOut 1s ease-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            40% { transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .success {
+            color: #26c281;
+            text-shadow: 0 0 20px rgba(38, 194, 129, 0.8);
+        }
+
+        .fail {
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+        }
+
+        /* شريط التقدم */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            height: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #26c281, #f6b93b);
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: progressShine 2s infinite linear;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* العد التنازلي */
+        .countdown {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10rem;
+            font-weight: bold;
+            color: #f6b93b;
+            text-shadow: 0 0 30px rgba(246, 185, 59, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            animation: countdownAnim 1s ease-out;
+        }
+
+        @keyframes countdownAnim {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        }
+
+        /* تأثيرات الشرارة */
+        .spark {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f6b93b;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            animation: sparkAnim 0.5s ease-out;
+        }
+
+        @keyframes sparkAnim {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0) translate(var(--tx), var(--ty)); }
+        }
+
+        /* تنسيقات للجوال */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .game-area {
+                height: 300px;
+                padding: 15px;
+            }
+            
+            .station {
+                width: 80px;
+            }
+            
+            .control-btn {
+                min-width: 180px;
+                padding: 15px 30px;
+                font-size: 1.2rem;
+            }
+            
+            .stat-value {
+                font-size: 2.2rem;
+            }
+            
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-value {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">⚡ SPEED CLICK CHALLENGE</h1>
+            <p class="game-subtitle">اضغط E عندما يصل المؤشر إلى المحطة!</p>
+            
+            <div class="game-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">🏆 النقاط</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label">📈 المستوى</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-value" id="speed">1x</div>
+                    <div class="stat-label">⚡ السرعة</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-value" id="streak">0</div>
+                    <div class="stat-label">🔥 متتالية</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="track-container">
+                <div class="station" id="station" style="left: 50%; transform: translateX(-50%);"></div>
+                <div class="pointer" id="pointer"></div>
+            </div>
+            
+            <div class="speed-indicators" id="speedIndicators"></div>
+            <div class="timing-indicators" id="timingIndicators"></div>
+        </div>
+
+        <div class="instructions">
+            <h3 class="instructions-title">🎮 طريقة اللعب:</h3>
+            <ul class="instructions-list">
+                <li><i class="fas fa-mouse-pointer"></i> شاهد المؤشر الأحمر يتحرك من اليسار إلى اليمين</li>
+                <li><i class="fas fa-bullseye"></i> عندما يصل المؤشر إلى المنطقة الخضراء (المحطة)</li>
+                <li><i class="fas fa-keyboard"></i> اضغط على <strong>زر E</strong> في لوحة المفاتيح</li>
+                <li><i class="fas fa-tachometer-alt"></i> مع تقدمك في المستويات، تزداد سرعة المؤشر</li>
+                <li><i class="fas fa-fire"></i> حافظ على سلسلة نقرات صحيحة لزيادة النقاط</li>
+                <li><i class="fas fa-exclamation-circle"></i> التوقيت الدقيق يعطيك نقاط إضافية!</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn start-btn" id="startBtn">
+                <i class="fas fa-play"></i>
+                <span>بدء التحدي</span>
+            </button>
+            
+            <button class="control-btn reset-btn" id="resetBtn">
+                <i class="fas fa-redo"></i>
+                <span>إعادة المحاولة</span>
+            </button>
+            
+            <a href="index.html" class="control-btn home-btn">
+                <i class="fas fa-home"></i>
+                <span>الصفحة الرئيسية</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="results-screen" id="resultsScreen">
+        <div class="results-card">
+            <h2 class="results-title">🎖️ نتائج التحدي</h2>
+            
+            <div class="performance-badge" id="performanceBadge">جيد</div>
+            
+            <div class="results-stats">
+                <div class="result-stat">
+                    <div class="result-value" id="finalScore">0</div>
+                    <div class="result-label">🏆 النقاط الإجمالية</div>
+                </div>
+                
+                <div class="result-stat">
+                    <div class="result-value" id="finalLevel">1</div>
+                    <div class="result-label">📈 أقصى مستوى</div>
+                </div>
+                
+                <div class="result-stat">
+                    <div class="result-value" id="finalStreak">0</div>
+                    <div class="result-label">🔥 أطول متتالية</div>
+                </div>
+                
+                <div class="result-stat">
+                    <div class="result-value" id="accuracy">100%</div>
+                    <div class="result-label">🎯 نسبة الدقة</div>
+                </div>
+            </div>
+            
+            <p style="color: #ddd; margin: 25px 0; font-size: 1.2rem;" id="resultMessage">
+                استمر في التدريب لتحسين مهاراتك!
+            </p>
+            
+            <div class="controls">
+                <button class="control-btn start-btn" id="retryBtn">
+                    <i class="fas fa-redo"></i>
+                    <span>حاول مرة أخرى</span>
+                </button>
+                
+                <button class="control-btn reset-btn" id="backToGameBtn">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>العودة للعبة</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // عناصر DOM
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const retryBtn = document.getElementById('retryBtn');
+        const backToGameBtn = document.getElementById('backToGameBtn');
+        const gameArea = document.getElementById('gameArea');
+        const station = document.getElementById('station');
+        const pointer = document.getElementById('pointer');
+        
+        // عناصر الإحصائيات
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const speedElement = document.getElementById('speed');
+        const streakElement = document.getElementById('streak');
+        const progressBar = document.getElementById('progressBar');
+        
+        // عناصر النتائج النهائية
+        const finalScoreElement = document.getElementById('finalScore');
+        const finalLevelElement = document.getElementById('finalLevel');
+        const finalStreakElement = document.getElementById('finalStreak');
+        const accuracyElement = document.getElementById('accuracy');
+        const performanceBadge = document.getElementById('performanceBadge');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // متغيرات اللعبة
+        let gameActive = false;
+        let score = 0;
+        let level = 1;
+        let currentSpeed = 1;
+        let streak = 0;
+        let maxStreak = 0;
+        let hits = 0;
+        let attempts = 0;
+        let pointerPosition = -100;
+        let pointerDirection = 1; // 1 = right, -1 = left
+        let pointerSpeed = 2;
+        let animationId = null;
+        let stationPosition = 0;
+        let stationWidth = 120;
+        let tolerance = 20; // التسامح في التوقيت
+        let gameTime = 0;
+        let countdownActive = false;
+        let gameDuration = 60; // 60 ثانية للعبة
+
+        // تهيئة اللعبة
+        function initGame() {
+            gameActive = false;
+            score = 0;
+            level = 1;
+            currentSpeed = 1;
+            streak = 0;
+            maxStreak = 0;
+            hits = 0;
+            attempts = 0;
+            pointerPosition = -100;
+            pointerSpeed = 2;
+            gameTime = 0;
+            
+            // تحديث واجهة المستخدم
+            updateStats();
+            updateProgressBar();
+            resultsScreen.style.display = 'none';
+            
+            // إعادة تعيين المؤشر والمحطة
+            pointer.style.left = pointerPosition + 'px';
+            stationPosition = gameArea.offsetWidth / 2 - stationWidth / 2;
+            station.style.left = stationPosition + 'px';
+            
+            // إنشاء مؤشرات السرعة
+            createSpeedIndicators();
+            
+            // إنشاء مؤشرات التوقيت
+            createTimingIndicators();
+            
+            // تفعيل الأزرار
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-play"></i><span>بدء التحدي</span>';
+            
+            // إيقاف الرسوم المتحركة
+            cancelAnimationFrame(animationId);
+            
+            console.log('لعبة السرعة جاهزة! استعد للتحدي! ⚡');
+        }
+
+        // بدء اللعبة
+        function startGame() {
+            if (gameActive || countdownActive) return;
+            
+            // بدء العد التنازلي
+            startCountdown();
+        }
+
+        // بدء العد التنازلي
+        function startCountdown() {
+            countdownActive = true;
+            startBtn.disabled = true;
+            
+            let count = 3;
+            const countdownElement = document.createElement('div');
+            countdownElement.className = 'countdown';
+            countdownElement.textContent = count;
+            document.body.appendChild(countdownElement);
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownElement.textContent = count;
+                } else {
+                    countdownElement.textContent = 'ابدأ!';
+                    setTimeout(() => {
+                        countdownElement.remove();
+                        countdownActive = false;
+                        actuallyStartGame();
+                    }, 500);
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        // بدء اللعبة فعلياً
+        function actuallyStartGame() {
+            gameActive = true;
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<i class="fas fa-running"></i><span>جاري اللعب...</span>';
+            
+            // بدء حركة المؤشر
+            movePointer();
+            
+            // بدء مؤقت اللعبة
+            startGameTimer();
+            
+            console.log('بدأ التحدي! حظاً موفقاً! 🚀');
+        }
+
+        // حركة المؤشر
+        function movePointer() {
+            if (!gameActive) return;
+            
+            // تحديث موقع المؤشر
+            pointerPosition += pointerSpeed * pointerDirection;
+            
+            // التحقق من حدود الشاشة
+            if (pointerPosition > gameArea.offsetWidth) {
+                pointerDirection = -1;
+                pointerPosition = gameArea.offsetWidth;
+            } else if (pointerPosition < -100) {
+                pointerDirection = 1;
+                pointerPosition = -100;
+            }
+            
+            // تحديث موقع المؤشر
+            pointer.style.left = pointerPosition + 'px';
+            
+            // التحقق من التوقيت التلقائي (إذا فاتت الفرصة)
+            checkAutoMiss();
+            
+            // استمرار الرسوم المتحركة
+            animationId = requestAnimationFrame(movePointer);
+        }
+
+        // التحقق من التوقيت التلقائي
+        function checkAutoMiss() {
+            if (!gameActive) return;
+            
+            // إذا مر المؤشر بالمحطة دون ضغط
+            const pointerCenter = pointerPosition + 10; // مركز المؤشر
+            const stationLeft = stationPosition;
+            const stationRight = stationPosition + stationWidth;
+            
+            if (pointerDirection === 1 && // يتحرك لليمين
+                pointerCenter > stationRight + tolerance && // تجاوز المحطة
+                attempts === hits) { // لم يتم النقر بعد
+                missHit();
+            }
+        }
+
+        // بدء مؤقت اللعبة
+        function startGameTimer() {
+            const gameTimer = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(gameTimer);
+                    return;
+                }
+                
+                gameTime++;
+                
+                // زيادة المستوى كل 10 ثواني
+                if (gameTime % 10 === 0) {
+                    increaseLevel();
+                }
+                
+                // إنهاء اللعبة بعد 60 ثانية
+                if (gameTime >= gameDuration) {
+                    endGame();
+                    clearInterval(gameTimer);
+                }
+                
+                // تحديث شريط التقدم
+                updateProgressBar();
+            }, 1000);
+        }
+
+        // زيادة المستوى
+        function increaseLevel() {
+            level++;
+            currentSpeed = 1 + (level * 0.2);
+            pointerSpeed = 2 + (level * 0.5);
+            
+            // تحديث الواجهة
+            updateStats();
+            
+            // تأثير زيادة المستوى
+            showLevelUpEffect();
+            
+            // تقليل حجم المحطة في المستويات العالية
+            if (level % 3 === 0 && stationWidth > 60) {
+                stationWidth = Math.max(60, stationWidth - 10);
+                station.style.width = stationWidth + 'px';
+                stationPosition = gameArea.offsetWidth / 2 - stationWidth / 2;
+                station.style.left = stationPosition + 'px';
+            }
+            
+            console.log(`المستوى ${level}! السرعة: ${currentSpeed.toFixed(1)}x ⚡`);
+        }
+
+        // التحقق من النقر
+        function checkHit() {
+            if (!gameActive) return;
+            
+            attempts++;
+            
+            const pointerCenter = pointerPosition + 10; // مركز المؤشر
+            const stationLeft = stationPosition;
+            const stationRight = stationPosition + stationWidth;
+            
+            // التحقق إذا كان المؤشر داخل المحطة
+            if (pointerCenter >= stationLeft && pointerCenter <= stationRight) {
+                // نجاح!
+                hits++;
+                streak++;
+                if (streak > maxStreak) {
+                    maxStreak = streak;
+                }
+                
+                // حساب النقاط بناءً على الدقة
+                const distanceFromCenter = Math.abs(pointerCenter - (stationLeft + stationWidth / 2));
+                const accuracyBonus = Math.max(0, 100 - distanceFromCenter);
+                const basePoints = 10;
+                const streakBonus = streak * 5;
+                const levelBonus = level * 2;
+                const points = basePoints + accuracyBonus + streakBonus + levelBonus;
+                
+                score += Math.round(points);
+                
+                // إظهار تأثير النجاح
+                showHitEffect(true, points);
+                
+                // تغيير اتجاه المؤشر
+                pointerDirection = -1;
+                
+                // إنشاء شرارات
+                createSparks(pointerCenter);
+            } else {
+                // فشل
+                missHit();
+            }
+            
+            // تحديث الإحصائيات
+            updateStats();
+        }
+
+        // معالجة الفشل
+        function missHit() {
+            streak = 0;
+            
+            // إظهار تأثير الفشل
+            showHitEffect(false);
+            
+            // تغيير اتجاه المؤشر
+            pointerDirection = -1;
+        }
+
+        // إظهار تأثير النقر
+        function showHitEffect(success, points = 0) {
+            const hitIndicator = document.createElement('div');
+            hitIndicator.className = `hit-indicator ${success ? 'success' : 'fail'}`;
+            hitIndicator.textContent = success ? `+${Math.round(points)} 🎯` : '✗ فاتتك!';
+            hitIndicator.style.top = '30%';
+            
+            gameArea.appendChild(hitIndicator);
+            
+            setTimeout(() => {
+                hitIndicator.remove();
+            }, 1000);
+        }
+
+        // إظهار تأثير زيادة المستوى
+        function showLevelUpEffect() {
+            const levelUp = document.createElement('div');
+            levelUp.className = 'hit-indicator success';
+            levelUp.textContent = `المستوى ${level}! ⚡`;
+            levelUp.style.top = '10%';
+            
+            gameArea.appendChild(levelUp);
+            
+            setTimeout(() => {
+                levelUp.remove();
+            }, 1500);
+        }
+
+        // إنشاء شرارات
+        function createSparks(x) {
+            for (let i = 0; i < 10; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = x + 'px';
+                spark.style.top = '50%';
+                
+                // سرعة واتجاه عشوائي
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 50 + Math.random() * 100;
+                const tx = Math.cos(angle) * speed;
+                const ty = Math.sin(angle) * speed;
+                
+                spark.style.setProperty('--tx', tx + 'px');
+                spark.style.setProperty('--ty', ty + 'px');
+                
+                gameArea.appendChild(spark);
+                
+                setTimeout(() => {
+                    spark.remove();
+                }, 500);
+            }
+        }
+
+        // إنشاء مؤشرات السرعة
+        function createSpeedIndicators() {
+            const indicatorsContainer = document.getElementById('speedIndicators');
+            indicatorsContainer.innerHTML = '';
+            
+            const indicatorCount = 20;
+            for (let i = 0; i < indicatorCount; i++) {
+                const indicator = document.createElement('div');
+                indicator.className = 'speed-indicator';
+                indicatorsContainer.appendChild(indicator);
+            }
+        }
+
+        // إنشاء مؤشرات التوقيت
+        function createTimingIndicators() {
+            const indicatorsContainer = document.getElementById('timingIndicators');
+            indicatorsContainer.innerHTML = '';
+            
+            const positions = ['بداية', 'مبكر', 'مثالي', 'متأخر', 'نهاية'];
+            positions.forEach(pos => {
+                const indicator = document.createElement('div');
+                indicator.className = 'timing-indicator';
+                indicator.textContent = pos;
+                indicatorsContainer.appendChild(indicator);
+            });
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            scoreElement.textContent = score;
+            levelElement.textContent = level;
+            speedElement.textContent = currentSpeed.toFixed(1) + 'x';
+            streakElement.textContent = streak;
+            
+            // تحديث لون المتتالية
+            if (streak >= 10) {
+                streakElement.style.color = '#ff6b6b';
+            } else if (streak >= 5) {
+                streakElement.style.color = '#f6b93b';
+            } else {
+                streakElement.style.color = '#26c281';
+            }
+        }
+
+        // تحديث شريط التقدم
+        function updateProgressBar() {
+            const progress = (gameTime / gameDuration) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        // إنهاء اللعبة
+        function endGame() {
+            gameActive = false;
+            cancelAnimationFrame(animationId);
+            
+            // حساب الدقة
+            const accuracy = attempts > 0 ? Math.round((hits / attempts) * 100) : 100;
+            
+            // تحديث النتائج النهائية
+            finalScoreElement.textContent = score;
+            finalLevelElement.textContent = level;
+            finalStreakElement.textContent = maxStreak;
+            accuracyElement.textContent = accuracy + '%';
+            
+            // تحديد الرتبة
+            let badge = '';
+            let message = '';
+            
+            if (score >= 10000) {
+                badge = 'أسطورة السرعة ⚡';
+                message = 'مذهل! ردود أفعالك خارقة! 🏆';
+            } else if (score >= 5000) {
+                badge = 'محترف سريع ⚡';
+                message = 'رائع! مهاراتك ممتازة! ⭐';
+            } else if (score >= 2000) {
+                badge = 'متوسط السرعة ⚡';
+                message = 'جيد جداً! استمر في التمرين! 👍';
+            } else {
+                badge = 'متدرب ⚡';
+                message = 'حاول مرة أخرى لتحسين نتيجتك! 💪';
+            }
+            
+            performanceBadge.textContent = badge;
+            resultMessage.textContent = message;
+            
+            // عرض شاشة النتائج
+            resultsScreen.style.display = 'flex';
+        }
+
+        // أحداث الأزرار
+        startBtn.addEventListener('click', startGame);
+        
+        resetBtn.addEventListener('click', () => {
+            if (confirm('هل تريد إعادة بدء اللعبة؟')) {
+                initGame();
+            }
+        });
+        
+        retryBtn.addEventListener('click', () => {
+            initGame();
+            resultsScreen.style.display = 'none';
+            setTimeout(startGame, 500);
+        });
+        
+        backToGameBtn.addEventListener('click', () => {
+            resultsScreen.style.display = 'none';
+            initGame();
+        });
+
+        // حدث الضغط على زر E
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'e' || e.key === 'E') {
+                checkHit();
+            }
+        });
+
+        // تهيئة اللعبة عند تحميل الصفحة
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
+<script>
+    // حل مشكلة iframe
+    if (window.self !== window.top) {
+        // نحن داخل iframe
+        document.addEventListener('DOMContentLoaded', function() {
+            // إعلام الصفحة الرئيسية أن اللعبة جاهزة
+            try {
+                parent.postMessage({ type: 'gameReady', game: 'game-name' }, '*');
+            } catch(e) {
+                // تجاهل الخطأ
+            }
+        });
+    }
+</script>
