@@ -504,5 +504,13 @@ function shareResult() {
         });
     }
 }
+// طريقة بسيطة باستخدام Console في المتصفح
+// ضع هذا الكود في Console (F12) عندما تكون في الموقع:
+document.querySelectorAll('input, textarea').forEach(element => {
+  element.onpaste = null;
+  element.oncopy = null;
+  element.oncut = null;
+  element.addEventListener('paste', e => e.stopPropagation(), true);
+});
 
 
