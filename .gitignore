@@ -1,0 +1,16 @@
+# Dependency directory
+node_modules/
+# Logs
+logs/
+*.log
+# Build directories
+dist/
+build/
+# Environment variables
+.env
+# Python cache files
+__pycache__/
+*.py[cod]
+# coverage reports
+.coverage
+htmlcov/
